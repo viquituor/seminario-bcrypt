@@ -1,0 +1,71 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><title>bcrypt - infográfico</title>
+<style>
+@page{size:1440px 3290px;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;height:3290px;overflow:hidden;font-family:"Segoe UI",Arial,sans-serif;background:#f4f1ea;color:#1c2438;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.top{background:#13213d;color:#fff;padding:60px 80px 50px}
+.top small{letter-spacing:3px;color:#7fe3d6;font-size:15px;font-weight:700}
+.top h1{font-size:120px;line-height:1;margin:10px 0}
+.top p{font-size:26px;color:#b9c7e0}
+.blk{margin:34px 80px 0;background:#fff;border-radius:22px;padding:34px 40px;box-shadow:0 2px 0 #d9d3c4}
+.n{display:inline-block;background:#ff9f1c;color:#13213d;font-weight:800;border-radius:50%;width:44px;height:44px;text-align:center;line-height:44px;font-size:22px;margin-right:12px}
+h2{font-size:34px;display:inline;vertical-align:middle}
+.blk>p{font-size:21px;color:#4a5570;margin:12px 0 18px}
+.flow{display:flex;gap:14px;align-items:stretch}
+.box{flex:1;background:#eef3fb;border:2px solid #c9d6ee;border-radius:16px;padding:18px;font-size:19px}
+.box b{display:block;font-size:21px;color:#13213d;margin-bottom:6px}
+.box.o{background:#fff3e0;border-color:#ffd49a}.box.g{background:#e6f8f5;border-color:#9fe3d9}
+.arrow{align-self:center;font-size:30px;color:#ff9f1c;font-weight:800}
+.mono{font-family:Consolas,monospace;font-size:21px;background:#13213d;color:#8ff0e0;padding:18px 24px;border-radius:14px;margin-top:10px;white-space:pre-wrap;word-break:break-all}
+.num{font-size:54px;font-weight:800;color:#ff7a00;line-height:1}
+table{width:100%;border-collapse:collapse;font-size:21px;margin-top:8px}
+th{background:#13213d;color:#7fe3d6;text-align:left;padding:10px 14px}td{padding:10px 14px;border-bottom:1px solid #e3deD0}
+.foot{margin:34px 80px 0;color:#6a7289;font-size:17px;text-align:center}
+</style></head><body>
+<div class="top"><small>GUIA VISUAL · SEMINÁRIO #01 · TEMA 09</small><h1>bcrypt<br>por dentro</h1>
+<p>Um hash de senhas que é lento de propósito. · Provos &amp; Mazières, USENIX 1999</p>
+<p style="margin-top:6px;font-size:20px;color:#7fe3d6">Isabela Sousa &amp; Paulo Victor Almeida · 8 blocos visuais</p></div>
+
+<div class="blk"><span class="n">1</span><h2>O problema: guardar senhas</h2>
+<p>Se o banco vazar, o que o atacante consegue? Depende de como a senha foi guardada.</p>
+<div class="flow"><div class="box"><b>Texto puro</b>Vazou = todas as senhas expostas.</div>
+<div class="box"><b>SHA-256 / MD5</b>Rápidos demais: bilhões de palpites por segundo em GPU.</div>
+<div class="box g"><b>bcrypt</b>Lento e ajustável: cada palpite custa milhares de cifragens.</div></div></div>
+
+<div class="blk"><span class="n">2</span><h2>Os três ingredientes</h2>
+<p>Tudo o que o bcrypt recebe e por que cada parte existe.</p>
+<div class="flow"><div class="box o"><div class="num">senha</div>até 72 bytes (UTF-8 + \0)</div>
+<div class="box o"><div class="num">sal</div>16 bytes aleatórios, únicos por senha</div>
+<div class="box o"><div class="num">custo</div>2<sup>custo</sup> iterações (4 a 31)</div></div></div>
+
+<div class="blk"><span class="n">3</span><h2>Anatomia do hash (60 caracteres)</h2>
+<div class="mono">$2b$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW</div>
+<div class="flow" style="margin-top:16px"><div class="box"><b>$2b$</b>versão</div><div class="box"><b>12</b>custo → 4096 iterações</div><div class="box"><b>22 chars</b>sal (16 bytes)</div><div class="box"><b>31 chars</b>hash (23 bytes)</div></div></div>
+
+<div class="blk"><span class="n">4</span><h2>A base: cifra Blowfish</h2>
+<p>Rede de Feistel com 16 rodadas, bloco de 64 bits e tabelas iniciais tiradas dos dígitos de π (P[0] = 243F6A88).</p>
+<div class="flow"><div class="box"><b>Vetor P</b>18 subchaves de 32 bits</div><div class="arrow">+</div><div class="box"><b>4 caixas S</b>256 palavras cada (4 KB)</div><div class="arrow">→</div><div class="box g"><b>F(x)</b>((S0[a]+S1[b]) ⊕ S2[c]) + S3[d]</div></div></div>
+
+<div class="blk"><span class="n">5</span><h2>O algoritmo em 6 passos</h2>
+<div class="flow" style="flex-wrap:wrap">
+<div class="box" style="min-width:30%"><b>1 · Chave</b>senha + \0, máx. 72 bytes</div>
+<div class="box" style="min-width:30%"><b>2 · Estado</b>P e S ← dígitos de π</div>
+<div class="box" style="min-width:30%"><b>3 · ExpandKey</b>(sal, senha)</div>
+<div class="box o" style="min-width:30%"><b>4 · Repetir 2<sup>custo</sup>×</b>ExpandKey(senha) e ExpandKey(sal)</div>
+<div class="box" style="min-width:30%"><b>5 · Cifrar 64×</b>“OrpheanBeholderScryDoubt”</div>
+<div class="box g" style="min-width:30%"><b>6 · Montar hash</b>$2b$ + custo + base64(sal) + base64(saída)</div></div></div>
+
+<div class="blk"><span class="n">6</span><h2>Custo: cada +1 dobra o esforço</h2>
+<p>Medido na nossa implementação, em cifragens Blowfish por hash.</p>
+<table><tr><th>Custo</th><th>Iterações</th><th>Cifragens</th><th>Razão</th></tr>
+<tr><td>4</td><td>16</td><td>17.385</td><td>—</td></tr><tr><td>5</td><td>32</td><td>34.057</td><td>×1,96</td></tr><tr><td>6</td><td>64</td><td>67.401</td><td>×1,98</td></tr><tr><td>7</td><td>128</td><td>134.089</td><td>×1,99</td></tr>
+<tr><td><b>12</b></td><td><b>4096</b></td><td><b>≈ 4,3 milhões</b></td><td><b>recomendado hoje</b></td></tr></table></div>
+
+<div class="blk"><span class="n">7</span><h2>Verificar senha no login</h2>
+<div class="flow"><div class="box"><b>1 · Ler</b>versão, custo e sal do hash guardado</div><div class="arrow">→</div><div class="box"><b>2 · Recalcular</b>bcrypt(senha digitada, mesmo custo e sal)</div><div class="arrow">→</div><div class="box g"><b>3 · Comparar</b>23 bytes em tempo constante</div></div></div>
+
+<div class="blk"><span class="n">8</span><h2>Limitações e alternativas</h2>
+<div class="flow"><div class="box o"><b>72 bytes</b>O excedente é ignorado — use pré-hash.</div><div class="box o"><b>Pouca memória</b>~4 KB: GPUs ainda ajudam o atacante.</div><div class="box g"><b>Argon2id / scrypt</b>Memory-hard; recomendados em sistemas novos.</div></div></div>
+
+<div class="foot">Implementação 100% nativa em Python (sem imports) · github.com/viquituor/seminario-bcrypt</div>
+</body></html>

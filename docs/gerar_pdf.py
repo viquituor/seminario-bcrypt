@@ -159,15 +159,17 @@ itens([
 ])
 
 titulo("7. Nossa implementacao (mapa para responder perguntas)")
-tabela(["Arquivo", "Funcoes principais"],
-       [["constantes.py", "calcular_pi_fracionario, gerar_tabelas_iniciais"],
-        ["blowfish.py", "EstadoBlowfish, funcao_f, cifrar_bloco, expandir_chave,", ""], ["", "expansao_custosa"],
-        ["bcrypt.py", "preparar_senha, calcular_hash_bruto, gerar_hash, verificar_senha, base64"],
-        ["main.py", "Menu: gerar, verificar, custo x tempo, efeito do sal"],
-        ["testes.py", "6 hashes identicos aos da lib oficial (vazia, acentos, >72 bytes)"]],
-       [38, 136])
-par("Sem bibliotecas: nem o hash nem as tabelas do Blowfish vem de fora - os digitos de PI sao calculados no proprio codigo (formula de Machin com inteiros grandes) e conferem com os valores oficiais. A biblioteca 'bcrypt' e usada APENAS em testes.py como gabarito.")
-par("Como rodar:   python main.py   |   python testes.py (requer pip install bcrypt so para o teste). Repositorio: github.com/viquituor/seminario-bcrypt")
+tabela(["Trecho de bcrypt_completo.py", "Funcoes principais"],
+       [["Utilitarios nativos", "GeradorAleatorioNativo, CronometroNativo, comparar_tempo_constante"],
+        ["Constantes (pi)", "calcular_pi_fracionario, gerar_tabelas_iniciais"],
+        ["Blowfish", "EstadoBlowfish, funcao_f, cifrar_bloco, expandir_chave"],
+        ["Eksblowfish", "expansao_custosa (2^custo iteracoes)"],
+        ["bcrypt", "preparar_senha, calcular_hash_bruto, gerar_hash, verificar_senha"],
+        ["Base64 do bcrypt", "codificar_base64, decodificar_base64"],
+        ["Demo (Partes 1 a 6)", "blowfish, passo a passo, vetores, sal/custo, ataque, 72 bytes"]],
+       [60, 114])
+par("SEM NENHUM IMPORT (como o RSA dos colegas): digitos de PI calculados no codigo (Machin), PRNG proprio SplitMix64 no lugar de os.urandom, comparacao em tempo constante no lugar de hmac, cronometro nativo que conta cifragens no lugar de time. A Parte 3 da demo confere com vetores oficiais; teste_contra_biblioteca.py (opcional, usa a lib oficial) compara 8 casos.")
+par("Como rodar:   python bcrypt_completo.py (demo em 6 partes + menu ao vivo). Repositorio: github.com/viquituor/seminario-bcrypt")
 
 titulo("8. Roteiro sugerido de apresentacao (~10 a 12 min)")
 par("Divisao sugerida entre os dois membros - ambos DEVEM falar e ambos devem saber responder tudo.")
@@ -176,25 +178,24 @@ tabela(["Tempo", "Quem", "Conteudo"],
         ["1:30-3:30", "Isabela", "Sal, custo (2^n), formato do hash de 60 chars"],
         ["3:30-6:00", "Paulo", "Blowfish (Feistel, P e S, digitos de PI) e Eksblowfish"],
         ["6:00-8:00", "Paulo", "Passo a passo do algoritmo (tabela da secao 5)"],
-        ["8:00-10:30", "Isabela", "Demo ao vivo: main.py opcoes 1, 4, 3 (e testes.py)"],
+        ["8:00-10:30", "Isabela", "Demo ao vivo: bcrypt_completo.py (Partes 3 a 6 + menu)"],
         ["10:30-12:00", "Ambos", "Limitacoes (72 bytes), Argon2/scrypt, conclusao"]],
        [26, 20, 128])
 sub("Demo ao vivo (sugestao)")
 itens([
-    "Opcao 1: gerar hash de 'senha123' com custo 4 mostrando os passos [1]..[4] na tela.",
-    "Opcao 4: mesma senha duas vezes gera hashes diferentes (efeito do sal).",
-    "Opcao 3: tabela custo x tempo - cada +1 dobra o tempo.",
-    "Opcao 2: verificar senha correta e incorreta.",
-    "python testes.py: mostrar que os hashes sao IDENTICOS aos da biblioteca oficial.",
-    "Dica: use custo baixo (4-6) na demo; Python puro e lento (custo 8 ~ 6 s).",
+    "Partes 1-6 rodam sozinhas (~15 s): Blowfish/pi, passo a passo, vetores oficiais, sal e custo, cadastro + ataque de dicionario, limite de 72 bytes.",
+    "Menu [1]: gerar hash ao vivo com a palavra que o professor escolher.",
+    "Menu [3]: ataque de dicionario contra a senha digitada (senha fraca cai; bcrypt so encarece).",
+    "Menu [4]: duas senhas de 80 caracteres que diferem so no fim geram o MESMO hash.",
+    "Dica: custo 4-6 na demo; Python puro e lento. O esforco e medido em cifragens Blowfish (custo +1 = 2x).",
 ])
 
 titulo("9. Roteiro do video (2 a 3 min)")
 itens([
     "Apresentar-se e o tema (bcrypt, para que serve).",
-    "Mostrar a estrutura das pastas e explicar em 3 frases o que cada arquivo faz.",
-    "Rodar main.py: gerar um hash com passo a passo e verificar a senha.",
-    "Rodar testes.py mostrando que bate com a biblioteca oficial.",
+    "Mostrar o arquivo unico e explicar em 3 frases: sem imports, Blowfish + custo, hash de 60 caracteres.",
+    "Rodar bcrypt_completo.py: mostrar as Partes 2 (passo a passo) e 3 (vetores oficiais).",
+    "Mostrar o ataque de dicionario (Parte 5) e o limite de 72 bytes (Parte 6).",
     "Encerrar com a limitacao dos 72 bytes e o Argon2 como alternativa.",
 ])
 
@@ -222,6 +223,8 @@ qa = [
      "Sao versoes; $2b$ e a atual. Nossa verificacao aceita 2a/2b/2y."),
     ("Qual custo usar hoje?",
      "Ao menos 12 (ajustar para ~250 ms a 1 s por hash no servidor)."),
+    ("O gerador de sal sem imports e seguro?",
+     "Nao para producao: usamos SplitMix64 semeado com enderecos de memoria, so para a demo. Em sistemas reais o sal vem do gerador criptografico do SO (os.urandom/secrets)."),
     ("Por que a implementacao em Python e mais lenta?",
      "Python interpretado faz cada cifragem em laco; C leva milissegundos. Por isso a demo usa custo baixo."),
 ]
