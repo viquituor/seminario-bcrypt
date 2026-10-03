@@ -1,5 +1,7 @@
 # Seminário #01 – Tema 09: bcrypt
 
+**Versão final da apresentação:** `bcrypt_seminario.py` + `docs/bcrypt_slides_seminario.pdf` (9 slides). Divisão da fala e guia de estudo: `docs/guia_apresentacao_estudo.pdf`.
+
 Isabela Sousa & Paulo Victor Almeida
 
 bcrypt implementado **do zero em Python, sem nenhum `import`** (nem `os`, `hmac`, `hashlib` ou `time`).
@@ -7,7 +9,7 @@ bcrypt implementado **do zero em Python, sem nenhum `import`** (nem `os`, `hmac`
 ## Como rodar
 
 ```bash
-python bcrypt_completo.py
+python bcrypt_seminario.py
 ```
 
 Roda 6 partes de demonstração e abre um menu interativo (hash ao vivo, verificação, ataque de dicionário, limite de 72 bytes).
