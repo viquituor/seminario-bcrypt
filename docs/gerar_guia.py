@@ -117,7 +117,7 @@ tabela(["Slide", "Quem", "Tempo", "Tema"],
         ["8 - bcrypt x scrypt x Argon2id", "Paulo", "1:00", "Tabela comparativa"],
         ["9 - Referencias", "Paulo", "0:30", "Encerramento e convite a perguntas"]],
        [40, 38, 16, 80], 9)
-par("Obs.: Isabela apresenta os slides 1 a 4 (cerca de 5 min) e Paulo o restante. Como a demo e longa, Isabela opera o terminal enquanto Paulo narra; ela tambem pode comentar a Parte 3 (vetores oficiais) para equilibrar. Por que a demo vem depois do slide 5 (e a troca de apresentador acontece ali)? O slide 5 mostra um exemplo real; ao rodar o codigo, a plateia ve os MESMOS passos acontecendo. Se faltar tempo, corte a Parte 4 da demo e deixe so o menu.")
+par("Obs.: Isabela apresenta os slides 1 a 5 (cerca de 6:30 min) e Paulo a demo e os slides 6 a 9 (cerca de 6:30 min). Paulo narra e opera o terminal; se quiserem, Isabela pode digitar o que Paulo pedir. Por que a demo vem depois do slide 5 (e a troca de apresentador acontece ali)? O slide 5 mostra um exemplo real; ao rodar o codigo, a plateia ve os MESMOS passos acontecendo. Se faltar tempo, corte a Parte 4 da demo e deixe so o menu.")
 
 sub("Falas sugeridas (resumo do que dizer em cada slide)")
 fala = [
