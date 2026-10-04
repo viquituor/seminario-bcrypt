@@ -27,12 +27,11 @@ Roda 6 partes de demonstração e abre um menu interativo (hash ao vivo, verific
 
 | Arquivo | Conteúdo |
 |---|---|
-| `bcrypt_completo.py` | **O trabalho** (arquivo único, sem imports) |
-| `teste_contra_biblioteca.py` | Teste extra: compara com a lib oficial `bcrypt` (única que usa import) |
-| `docs/slides_bcrypt.pdf` | Slides da apresentação (14) |
-| `docs/infografico_bcrypt.pdf` | Infográfico "bcrypt por dentro" |
-| `docs/resumo_bcrypt.pdf` | Resumo, roteiro da dupla, perguntas e respostas |
-| `docs/*.html`, `docs/gerar_pdf.py` | Fontes dos PDFs |
+| `bcrypt_seminario.py` | **O trabalho** (arquivo único, sem imports) |
+| `docs/bcrypt_slides_seminario.pdf` | Slides da apresentação (9) |
+| `docs/guia_apresentacao_estudo.pdf` | Divisão da fala, guia de estudo do código e perguntas |
+| `docs/bcrypt_para_notebooklm.pdf` | Texto corrido para o NotebookLM |
+| `docs/infografico_bcrypt.pdf`, `docs/resumo_bcrypt.pdf` | Material extra |
 
 ## Algoritmo
 
