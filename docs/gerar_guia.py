@@ -110,14 +110,14 @@ tabela(["Slide", "Quem", "Tempo", "Tema"],
         ["2 - O que e o bcrypt", "Isabela", "1:30", "Hash de mao unica, sal, custo, anatomia do hash"],
         ["3 - Os 6 passos", "Isabela", "2:00", "Passos do algoritmo e a funcao de cada um no codigo"],
         ["4 - Fluxo completo", "Isabela", "1:00", "Diagrama: onde esta o loop 2^custo"],
-        ["5 - Exemplo pratico", "Paulo", "1:30", "Senha 'senhaeu', custo 5, e como o login funciona"],
-        ["DEMO - codigo", "Paulo narra / Isabela opera o terminal", "3:00", "Partes 1 a 5 e menu (ver abaixo)"],
+        ["5 - Exemplo pratico", "Isabela", "1:30", "Senha 'senhaeu', custo 5, e como o login funciona"],
+        ["DEMO - codigo", "Paulo", "3:00", "Partes 1 a 5 e menu (ver abaixo)"],
         ["6 - Por que e seguro", "Paulo", "1:00", "Sal, custo, etapas em sequencia, tempo constante"],
         ["7 - Vantagens e limites", "Paulo", "1:00", "72 bytes, 4 KB, byte nulo"],
         ["8 - bcrypt x scrypt x Argon2id", "Paulo", "1:00", "Tabela comparativa"],
         ["9 - Referencias", "Paulo", "0:30", "Encerramento e convite a perguntas"]],
        [40, 38, 16, 80], 9)
-par("Obs.: Isabela apresenta os slides 1 a 4 (cerca de 5 min) e Paulo o restante. Como a demo e longa, Isabela opera o terminal enquanto Paulo narra; ela tambem pode comentar a Parte 3 (vetores oficiais) para equilibrar. Por que a demo vem depois do slide 5? O slide 5 mostra um exemplo real; ao rodar o codigo, a plateia ve os MESMOS passos acontecendo. Se faltar tempo, corte a Parte 4 da demo e deixe so o menu.")
+par("Obs.: Isabela apresenta os slides 1 a 4 (cerca de 5 min) e Paulo o restante. Como a demo e longa, Isabela opera o terminal enquanto Paulo narra; ela tambem pode comentar a Parte 3 (vetores oficiais) para equilibrar. Por que a demo vem depois do slide 5 (e a troca de apresentador acontece ali)? O slide 5 mostra um exemplo real; ao rodar o codigo, a plateia ve os MESMOS passos acontecendo. Se faltar tempo, corte a Parte 4 da demo e deixe so o menu.")
 
 sub("Falas sugeridas (resumo do que dizer em cada slide)")
 fala = [
@@ -125,7 +125,7 @@ fala = [
     ("Slide 2 (Isabela)", "bcrypt e uma funcao de hash feita para senhas, criada em 1999 por Provos e Mazieres, baseada na cifra Blowfish. Tres ideias: hash de mao unica (do hash nao se volta a senha), sal aleatorio de 16 bytes (mesma senha, hashes diferentes) e custo ajustavel (2^custo repeticoes; cada +1 dobra o tempo). Mostrar a anatomia: versao, custo, sal de 22 caracteres, hash de 31."),
     ("Slide 3 (Isabela)", "Os 6 passos: (1) senha vira bytes + \\0, corta em 72; (2) estado inicial com digitos de pi; (3) ExpandKey mistura sal e senha, 521 cifragens; (4) repete 2^custo vezes ExpandKey(senha) e ExpandKey(sal) - AQUI esta a lentidao; (5) cifra 64 vezes o texto fixo; (6) monta a string final. Cada caixa do slide tem embaixo o nome da funcao no codigo."),
     ("Slide 4 (Isabela)", "Mesmo fluxo em diagrama. Destacar: o banco guarda so o hash; sal e custo ficam dentro dele, por isso o login consegue refazer o calculo. Com custo 5 sao 34.057 cifragens Blowfish."),
-    ("Slide 5 (Paulo)", "Valores reais do nosso programa para a senha 'senhaeu' com custo 5. Mostrar como P[0] muda a cada etapa (243F6A88 -> 74F1E7CD -> 03CCDF0A). No login: le custo e sal do hash, refaz o calculo com a senha digitada, compara em tempo constante. Uma letra diferente muda o hash por completo."),
+    ("Slide 5 (Isabela)", "Valores reais do nosso programa para a senha 'senhaeu' com custo 5. Mostrar como P[0] muda a cada etapa (243F6A88 -> 74F1E7CD -> 03CCDF0A). No login: le custo e sal do hash, refaz o calculo com a senha digitada, compara em tempo constante. Uma letra diferente muda o hash por completo."),
     ("Slide 6 (Paulo)", "Seguranca: o bcrypt nao impede o palpite, torna cada palpite caro. Sal unico (rainbow tables inuteis), custo acompanha o hardware (recomendado 12, minimo 10), etapas em sequencia (nao paraleliza), comparacao em tempo constante (evita timing attack). Os numeros de tentativas/s sao de uma fonte externa (Medium, 2025) - citar como tal."),
     ("Slide 7 (Paulo)", "Vantagens: feito para senhas, sal embutido, custo ajustavel, usado desde 1999. Limitacoes: 72 bytes (o resto e ignorado - mostramos na demo), so ~4 KB de memoria (GPU/ASIC ajudam o atacante), byte nulo proibido, senha fraca continua fraca."),
     ("Slide 8 (Paulo)", "bcrypt (1999, 4 KB fixa) x scrypt (2009, memoria configuravel) x Argon2id (2015, tempo/memoria/threads, recomendado pela OWASP). Para sistemas novos, Argon2id; bcrypt continua aceito (custo 10+)."),
@@ -146,9 +146,9 @@ tabela(["Parte", "O que aparece", "O que dizer", "Quem"],
         ["3", "Vetores oficiais: OK OK OK", "Nosso codigo gera o MESMO hash que o bcrypt oficial: prova de que esta correto.", "Paulo"],
         ["4", "Dois hashes da mesma senha; login; ataque", "Sal: hashes diferentes. Ataque de dicionario acha 'senha123' na 6a tentativa: bcrypt nao salva senha fraca.", "Paulo"],
         ["5", "Hashes iguais: True", "Limite de 72 bytes: tudo depois do byte 72 e ignorado.", "Paulo"],
-        ["Menu 1", "Gerar hash ao vivo", "Pedir uma senha ao professor/plateia e gerar com custo 4.", "Paulo opera"],
-        ["Menu 2", "Verificar senha", "Colar o hash gerado: certa = CORRETA; mudar uma letra = INCORRETA.", "Isabela opera"],
-        ["Menu 3", "Atacar sua senha", "Senha forte nao esta no dicionario; 'dragon' cai.", "Paulo opera"]],
+        ["Menu 1", "Gerar hash ao vivo", "Pedir uma senha ao professor/plateia e gerar com custo 4.", "Paulo"],
+        ["Menu 2", "Verificar senha", "Colar o hash gerado: certa = CORRETA; mudar uma letra = INCORRETA.", "Paulo"],
+        ["Menu 3", "Atacar sua senha", "Senha forte nao esta no dicionario; 'dragon' cai.", "Paulo"]],
        [14, 48, 90, 22], 8.5)
 par("Dicas: abra o terminal ANTES e rode uma vez para ver o tempo (cerca de 15 s ate o menu). Use custo 4 na demo (Python puro e lento; custo 8 leva varios segundos). Se der branco, diga: 'o esforco e medido em cifragens Blowfish; custo +1 dobra'.")
 
@@ -308,7 +308,7 @@ itens([
     "[ ] Abrir slides e terminal (na pasta do arquivo) antes de comecar.",
     "[ ] Cada um treina as suas falas em voz alta, cronometrando (~12 min).",
     "[ ] Os dois leem a Parte 2 e as perguntas da Parte 3.",
-    "[ ] Combinar quem responde primeiro cada tipo de pergunta: slides 1 a 4 (conceito e passos) = Isabela; slides 5 a 9 e demo (codigo, seguranca, comparacao) = Paulo. Se a pergunta for do outro, o outro complementa.",
+    "[ ] Combinar quem responde primeiro cada tipo de pergunta: slides 1 a 5 (conceito, passos e exemplo) = Isabela; demo e slides 6 a 9 (codigo, seguranca, limitacoes, comparacao) = Paulo. Se a pergunta for do outro, o outro complementa.",
 ])
 
 saida = os.path.join(os.path.dirname(os.path.abspath(__file__)), "guia_apresentacao_estudo.pdf")
