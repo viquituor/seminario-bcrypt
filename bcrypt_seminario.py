@@ -322,8 +322,6 @@ def verificar_senha(senha, armazenado):
 # ---------------------------------------------------------------------
 
 CUSTO = 4      # Python puro e lento: use 4 a 6 na demo (producao: 12+)
-DICIONARIO = ["123456", "password", "qwerty", "abc123", "letmein",
-              "senha123", "admin", "iloveyou", "monkey", "dragon"]
 # Vetores de teste: pares (senha, hash) gerados pela biblioteca OFICIAL.
 # Se o nosso codigo produzir o mesmo hash, a implementacao esta correta.
 VETORES = [("U*U", "$2a$05$CCCCCCCCCCCCCCCCCCCCC.E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW"),
@@ -344,18 +342,8 @@ def ler(prompt, padrao=""):
 
 
 def parte_1():
-    """Mostra que os digitos de PI calculados batem com os do paper."""
-    titulo("PARTE 1 - Blowfish e os digitos de PI")
-    ok = P0[0] == 0x243F6A88 and S0[0][0] == 0xD1310BA6
-    print(f" P[0] = {P0[0]:08X} (oficial 243F6A88) | S0[0] = {S0[0][0]:08X} (oficial D1310BA6)")
-    print(" Tabelas identicas as do paper do Blowfish." if ok else " ERRO nas tabelas!")
-    e, d = cifrar_bloco(Estado(), 0, 0, detalhar=True)
-    print(f"           Resultado: E = {e:08X}  D = {d:08X}")
-
-
-def parte_2():
     """Gera um hash mostrando os 6 passos e confere a contagem de cifragens."""
-    titulo("PARTE 2 - bcrypt passo a passo (senha 'abc', custo 4)")
+    titulo("PARTE 1 - bcrypt passo a passo (senha 'abc', custo 4)")
     contador[0] = 0
     h = gerar_hash("abc", CUSTO, detalhar=True)
     # (1 + 2*2^custo) ExpandKey x 521 cifragens + 64 x 3 blocos finais
@@ -363,43 +351,65 @@ def parte_2():
     print(f" Anatomia: $2b$ versao | {h[4:6]} custo | {h[7:29]} sal | {h[29:]} hash")
 
 
+def parte_2():
+    """Efeito do sal: mesma senha, hashes diferentes."""
+    titulo("PARTE 2 - O sal: mesma senha, hashes diferentes")
+    h1, h2 = gerar_hash("senha123", CUSTO), gerar_hash("senha123", CUSTO)
+    print(" Senha usada nas duas vezes: 'senha123'")
+    print(f" hash 1: {h1}")
+    print(f" hash 2: {h2}")
+    print(f" sal 1:  {h1[7:29]}")
+    print(f" sal 2:  {h2[7:29]}")
+    print(f" Hashes iguais? {h1 == h2} -> cada hash recebeu um sal aleatorio proprio.")
+    print(" Os dois continuam validos: o login le o sal de dentro de cada hash.")
+    print(f" verificar_senha('senha123', hash 1) = {verificar_senha('senha123', h1)}")
+    print(f" verificar_senha('senha123', hash 2) = {verificar_senha('senha123', h2)}")
+
+
 def parte_3():
+    """Limite de 72 bytes: senhas diferentes depois do byte 72 sao a MESMA senha."""
+    titulo("PARTE 3 - Limite de 72 bytes: senhas diferentes, mesmo hash")
+    base = "A" * 72
+    senha_a = base + "-final-um"
+    senha_b = base + "-OUTRO-final"
+    senha_c = "B" + base[1:] + "-final-um"       # difere no 1o byte (dentro dos 72)
+    sal = gerar_sal()                            # mesmo sal para comparar de forma justa
+    hash_a = gerar_hash(senha_a, CUSTO, sal)
+    hash_b = gerar_hash(senha_b, CUSTO, sal)
+    hash_c = gerar_hash(senha_c, CUSTO, sal)
+    print(f" Senha A: 72 x 'A' + '-final-um'      ({len(senha_a)} bytes)")
+    print(f" Senha B: 72 x 'A' + '-OUTRO-final'   ({len(senha_b)} bytes)")
+    print(f" Senha C: 'B' + 71 x 'A' + '-final-um' ({len(senha_c)} bytes)")
+    print(f" A e B sao diferentes? {senha_a != senha_b}  (so mudam DEPOIS do byte 72)")
+    print(f" C e A sao diferentes? {senha_c != senha_a}  (mudam logo no 1o byte)")
+    print(f"\n hash A: {hash_a}")
+    print(f" hash B: {hash_b}")
+    print(f" hash C: {hash_c}")
+    print(f"\n hash A == hash B ? {hash_a == hash_b}  <- o bcrypt ignorou tudo depois do byte 72")
+    print(f" hash A == hash C ? {hash_a == hash_c}  <- mudanca dentro dos 72 bytes altera o hash")
+    entra = verificar_senha(senha_b, hash_a)
+    print(f"\n Login na conta da senha A usando a senha B: {'ACEITO!' if entra else 'negado'}")
+    print(" Consequencia: duas senhas diferentes valem o mesmo. Solucao: pre-hash da senha.")
+
+
+def extra_blowfish():
+    """Mostra que os digitos de PI calculados batem com os do paper."""
+    titulo("EXTRA - Blowfish e os digitos de PI")
+    ok = P0[0] == 0x243F6A88 and S0[0][0] == 0xD1310BA6
+    print(f" P[0] = {P0[0]:08X} (oficial 243F6A88) | S0[0] = {S0[0][0]:08X} (oficial D1310BA6)")
+    print(" Tabelas identicas as do paper do Blowfish." if ok else " ERRO nas tabelas!")
+    e, d = cifrar_bloco(Estado(), 0, 0, detalhar=True)
+    print(f"           Resultado: E = {e:08X}  D = {d:08X}")
+
+
+def extra_vetores():
     """Prova de correcao: confere com hashes gerados pelo bcrypt oficial."""
-    titulo("PARTE 3 - Vetores de teste oficiais do bcrypt")
+    titulo("EXTRA - Vetores de teste oficiais do bcrypt")
     for senha, esperado in VETORES:
         sal = b64_decodificar(esperado[7:29], 16)
         obtido = gerar_hash(senha, int(esperado[4:6]), sal)
         # $2a$ e $2b$ so diferem no prefixo, entao comparamos de [4:] em diante
         print(f" senha {senha!r:6} -> {'OK' if obtido[4:] == esperado[4:] else 'ERRO'}")
-
-
-def ataque(alvo):
-    """Simula um atacante que roubou o hash e tenta cada senha do dicionario."""
-    contador[0] = 0
-    for i, palavra in enumerate(DICIONARIO, 1):
-        acertou = verificar_senha(palavra, alvo)
-        print(f"   tentativa {i:2d}: {palavra!r:12} -> {'ACERTOU!' if acertou else 'errou'}")
-        if acertou:
-            return palavra
-    return None
-
-
-def parte_4():
-    """Efeito do sal, login e ataque de dicionario."""
-    titulo("PARTE 4 - Sal, login e ataque de dicionario")
-    h1, h2 = gerar_hash("senha123", CUSTO), gerar_hash("senha123", CUSTO)
-    print(f" hash 1: {h1}\n hash 2: {h2}\n Iguais? {h1 == h2} (mesma senha, sais diferentes)")
-    print(" Login certo:", verificar_senha("senha123", h1), "| Login errado:", verificar_senha("senha124", h1))
-    ataque(h1)
-    print(f" Custo: {contador[0]:,} cifragens. bcrypt nao salva senha fraca, so encarece cada palpite.")
-
-
-def parte_5():
-    """Mostra a limitacao de 72 bytes: o excedente e ignorado."""
-    titulo("PARTE 5 - Limite de 72 bytes")
-    sal = gerar_sal()
-    h1, h2 = gerar_hash("A" * 72 + "123", CUSTO, sal), gerar_hash("A" * 72 + "999", CUSTO, sal)
-    print(f" Hashes iguais? {h1 == h2} -> tudo depois do byte 72 e IGNORADO.")
 
 
 def cifragens_por_hash(custo):
@@ -438,7 +448,8 @@ def forca_bruta_pin():
 def menu():
     """Menu para testar ao vivo na apresentacao."""
     while True:
-        titulo("MENU: [1] Gerar hash  [2] Verificar senha  [3] Atacar sua senha  [4] Forca bruta em PIN  [0] Sair")
+        titulo("MENU: [1] Gerar hash  [2] Verificar senha  [3] Forca bruta em PIN  [0] Sair")
+        print(" Extras: [4] Vetores oficiais  [5] Blowfish e PI")
         op = ler(" Escolha: ", "0")
         if op == "1":
             try:
@@ -449,14 +460,15 @@ def menu():
             ok = verificar_senha(ler("Senha: "), ler("Hash ($2b$...): "))
             print(" Senha CORRETA" if ok else " Senha INCORRETA (ou hash invalido)")
         elif op == "3":
-            alvo = gerar_hash(ler("Senha (padrao 'dragon'): ", "dragon"), CUSTO)
-            print(" QUEBRADA!" if ataque(alvo) else " Nao esta no dicionario.")
-        elif op == "4":
             forca_bruta_pin()
+        elif op == "4":
+            extra_vetores()
+        elif op == "5":
+            extra_blowfish()
         elif op == "0":
             break
 
 
 if __name__ == "__main__":
-    parte_1(); parte_2(); parte_3(); parte_4(); parte_5()
+    parte_1(); parte_2(); parte_3()
     menu()
