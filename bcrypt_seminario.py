@@ -402,10 +402,43 @@ def parte_5():
     print(f" Hashes iguais? {h1 == h2} -> tudo depois do byte 72 e IGNORADO.")
 
 
+def cifragens_por_hash(custo):
+    """Cifragens Blowfish para gerar UM hash: (1 + 2*2^custo) ExpandKey x 521 + 192."""
+    return (1 + 2 * 2 ** custo) * 521 + 192
+
+
+def forca_bruta_pin():
+    """Forca bruta em PIN de 2 digitos: o atacante tenta 00, 01, 02... ate acertar.
+    Depois projeta o esforco para PINs maiores e para o custo 12."""
+    pin = ler("PIN de 2 digitos (padrao 07): ", "07")
+    if len(pin) != 2 or not pin.isdigit():
+        print(" Digite exatamente 2 digitos.")
+        return
+    alvo = gerar_hash(pin, CUSTO)
+    print(f" Hash do PIN (custo {CUSTO}): {alvo}\n Atacante testando 00, 01, 02, ...")
+    contador[0] = 0
+    for n in range(100):
+        palpite = f"{n:02d}"
+        acertou = verificar_senha(palpite, alvo)
+        if acertou or n % 10 == 0:
+            print(f"   tentativa {n + 1:3d}: {palpite} -> {'ACERTOU!' if acertou else 'errou'}")
+        if acertou:
+            break
+    gasto = contador[0]
+    print(f"\n PIN descoberto em {n + 1} tentativa(s): {gasto:,} cifragens ({gasto // (n + 1):,} por tentativa).")
+    print("\n Projecao do PIOR CASO (testar todas as combinacoes):")
+    print(f"   {'PIN':10}{'combinacoes':>13}{'custo':>7}{'cifragens':>20}{'vs. agora':>14}")
+    for nome, combos in (("2 digitos", 100), ("4 digitos", 10 ** 4), ("6 digitos", 10 ** 6)):
+        for c in (CUSTO, 12):
+            total = combos * cifragens_por_hash(c)
+            print(f"   {nome:10}{combos:>13,}{c:>7}{total:>20,}{total / gasto:>13,.0f}x")
+    print(" Moral: o esforco cresce com o tamanho da senha E com o custo (4 -> 12 = ~245x).")
+
+
 def menu():
     """Menu para testar ao vivo na apresentacao."""
     while True:
-        titulo("MENU: [1] Gerar hash  [2] Verificar senha  [3] Atacar sua senha  [0] Sair")
+        titulo("MENU: [1] Gerar hash  [2] Verificar senha  [3] Atacar sua senha  [4] Forca bruta em PIN  [0] Sair")
         op = ler(" Escolha: ", "0")
         if op == "1":
             try:
@@ -418,6 +451,8 @@ def menu():
         elif op == "3":
             alvo = gerar_hash(ler("Senha (padrao 'dragon'): ", "dragon"), CUSTO)
             print(" QUEBRADA!" if ataque(alvo) else " Nao esta no dicionario.")
+        elif op == "4":
+            forca_bruta_pin()
         elif op == "0":
             break
 
