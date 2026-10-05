@@ -111,7 +111,7 @@ tabela(["Slide", "Quem", "Tempo", "Tema"],
         ["3 - Os 6 passos", "Isabela", "2:00", "Passos do algoritmo e a funcao de cada um no codigo"],
         ["4 - Fluxo completo", "Isabela", "1:00", "Diagrama: onde esta o loop 2^custo"],
         ["5 - Exemplo pratico", "Isabela", "1:30", "Senha 'senhaeu', custo 5, e como o login funciona"],
-        ["DEMO - codigo", "Paulo", "3:00", "Partes 1 a 5 e menu (ver abaixo)"],
+        ["DEMO - codigo", "Paulo", "3:00", "Partes 1 a 3 e menu (ver abaixo)"],
         ["6 - Por que e seguro", "Paulo", "1:00", "Sal, custo, etapas em sequencia, tempo constante"],
         ["7 - Vantagens e limites", "Paulo", "1:00", "72 bytes, 4 KB, byte nulo"],
         ["8 - bcrypt x scrypt x Argon2id", "Paulo", "1:00", "Tabela comparativa"],
@@ -140,17 +140,15 @@ for t, f in fala:
     pdf.ln(1)
 
 sub("Roteiro da demo ao vivo (python bcrypt_seminario.py)")
-tabela(["Parte", "O que aparece", "O que dizer", "Quem"],
-       [["1", "P[0]=243F6A88 e primeira cifragem de bloco", "Os digitos de pi sao calculados, nao colados, e batem com o paper do Blowfish. Uma rodada de Feistel mostrada.", "Paulo"],
-        ["2", "Os 6 passos com custo 4; contagem de cifragens", "Cada [Passo N] e um passo do slide 3. 17.385 cifragens = (1+2*16)*521 + 192.", "Paulo"],
-        ["3", "Vetores oficiais: OK OK OK", "Nosso codigo gera o MESMO hash que o bcrypt oficial: prova de que esta correto.", "Paulo"],
-        ["4", "Dois hashes da mesma senha; login; ataque", "Sal: hashes diferentes. Ataque de dicionario acha 'senha123' na 6a tentativa: bcrypt nao salva senha fraca.", "Paulo"],
-        ["5", "Hashes iguais: True", "Limite de 72 bytes: tudo depois do byte 72 e ignorado.", "Paulo"],
-        ["Menu 1", "Gerar hash ao vivo", "Pedir uma senha ao professor/plateia e gerar com custo 4.", "Paulo"],
-        ["Menu 2", "Verificar senha", "Colar o hash gerado: certa = CORRETA; mudar uma letra = INCORRETA.", "Paulo"],
-        ["Menu 3", "Atacar sua senha", "Senha forte nao esta no dicionario; 'dragon' cai.", "Paulo"]],
-       [14, 48, 90, 22], 8.5)
-par("Dicas: abra o terminal ANTES e rode uma vez para ver o tempo (cerca de 15 s ate o menu). Use custo 4 na demo (Python puro e lento; custo 8 leva varios segundos). Se der branco, diga: 'o esforco e medido em cifragens Blowfish; custo +1 dobra'.")
+tabela(["Parte", "O que aparece", "O que dizer"],
+       [["1", "Os passos 1 a 6 (senha 'abc', custo 4) e a contagem de cifragens", "Cada [Passo N] e um passo do slide 3. P[0] muda a cada etapa. 17.385 cifragens = (1+2*16)*521 + 192. Anatomia: versao, custo, sal (22), hash (31)."],
+        ["2", "Dois hashes da mesma senha 'senha123'", "Cada hash tem um sal aleatorio diferente, entao os hashes sao diferentes; mas os dois validam a mesma senha (True/True)."],
+        ["3", "Senhas A, B e C; hashes A = B; login com B aceito", "So os 72 primeiros bytes contam: A e B diferem depois do byte 72 e geram o MESMO hash; C difere no 1o byte e muda o hash. B entra na conta de A. Solucao: pre-hash."],
+        ["Menu 1", "Gerar hash ao vivo", "Pedir uma senha ao professor/plateia e gerar com custo 4."],
+        ["Menu 2", "Verificar senha", "Colar o hash gerado: certa = CORRETA; mudar uma letra = INCORRETA."],
+        ["Menu 3", "Forca bruta em PIN", "Digite um PIN de 2 digitos; o atacante testa 00, 01... e a tabela projeta o esforco: PIN maior e custo 12 = milhoes de vezes mais trabalho."]],
+       [16, 56, 102], 8.5)
+par("Dicas: abra o terminal ANTES e rode uma vez para ver o tempo (cerca de 8 s ate o menu). Use custo 4 na demo (Python puro e lento; custo 8 leva varios segundos). Se der branco, diga: 'o esforco e medido em cifragens Blowfish; custo +1 dobra'.")
 
 # =========================================================== PARTE 2 ======
 titulo("PARTE 2 - Como o codigo funciona (guia de estudo)")
@@ -160,7 +158,7 @@ codigo("A  digitos de pi        -> P0, S0 (valores iniciais)\n"
        "C  base64 do bcrypt    -> b64_codificar, b64_decodificar\n"
        "D  sal aleatorio       -> gerar_sal (SplitMix64)\n"
        "E  bcrypt              -> hash_bruto, gerar_hash, verificar_senha\n"
-       "   demo                -> parte_1 .. parte_5, ataque, menu")
+       "   demo                -> parte_1 .. parte_3, forca_bruta_pin, menu")
 
 sub("0. Truques de Python usados")
 itens([
@@ -176,7 +174,7 @@ itens([
     "Formula de Machin: pi = 16*arctan(1/5) - 4*arctan(1/239). arctan(1/x) e calculado pela serie de Taylor: 1/x - 1/(3x^3) + 1/(5x^5) - ...",
     "Como nao ha decimais, tudo e multiplicado por uma 'escala' enorme (1 << (bits+64)) e as divisoes sao inteiras (//). Os 64 bits extras evitam erro de arredondamento.",
     "'pi - 3*escala' remove a parte inteira (3). A fracao e fatiada em palavras de 32 bits: as 18 primeiras formam P, as seguintes formam as 4 S-boxes de 256.",
-    "Prova de que deu certo: P[0] = 243F6A88 e S0[0] = D1310BA6, iguais ao paper do Blowfish (parte_1 confere isso).",
+    "Prova de que deu certo: P[0] = 243F6A88 e S0[0] = D1310BA6, iguais ao paper do Blowfish (conferido durante o desenvolvimento).",
     "Por que pi? 'Nothing up my sleeve': ninguem pode dizer que o autor escondeu uma backdoor nos numeros.",
 ])
 
@@ -223,7 +221,7 @@ codigo("hash_bruto(senha, custo, sal):\n"
        "gerar_hash: '$2b$' + custo(2 digitos) + '$' + b64(sal) + b64(23 bytes)   # passo 6")
 itens([
     "Validacoes: custo entre 4 e 31, sal com 16 bytes, senha sem byte nulo (o \\0 e o terminador que se acrescenta).",
-    "Limite de 72: 18 palavras de P x 4 bytes = 72. O corte [:72] descarta o excedente, por isso duas senhas iguais nos 72 primeiros bytes geram o mesmo hash (parte_5).",
+    "Limite de 72: 18 palavras de P x 4 bytes = 72. O corte [:72] descarta o excedente, por isso duas senhas iguais nos 72 primeiros bytes geram o mesmo hash (parte_3).",
     "Passo 4 usa o proprio sal como 'chave' no segundo expandir_chave (16 bytes repetidos ciclicamente). Sem sal no argumento.",
     "O texto fixo tem 24 bytes = 3 blocos de 64 bits (esq,dir_). Cifrar 64 vezes cada bloco e o 'embaralhamento final'. Saida: 24 bytes, o ultimo e descartado -> 23 bytes. (Detalhe historico do bcrypt.)",
     "verificar_senha: separa '$2b$05$...' em versao, custo e resto (53 chars). Os 22 primeiros viram o sal, os 31 ultimos o hash esperado. Recalcula com a senha digitada e compara. Nunca 'descriptografa'.",
@@ -236,14 +234,13 @@ tabela(["Custo", "Iteracoes", "Cifragens Blowfish"],
        [30, 50, 94])
 par("Formula: cifragens = (1 + 2*2^custo) * 521 + 192. Os 521 sao de cada ExpandKey (9+512); o 1 e o ExpandKey(sal,senha) inicial; os 2*2^custo sao os dois por iteracao; os 192 = 64 repeticoes x 3 blocos do final. Conferindo custo 5: 65*521 = 33.865; + 192 = 34.057.")
 
-sub("Demonstracao (parte_1 a parte_5, ataque, menu)")
+sub("Demonstracao (parte_1 a parte_3, forca_bruta_pin, menu)")
 itens([
-    "parte_1: confere pi com o paper e mostra 3 rodadas de Feistel.",
-    "parte_2: gera hash de 'abc' com custo 4 e confere a contagem de cifragens com a formula.",
-    "parte_3: 3 vetores (senha, hash) do bcrypt oficial; recupera o sal do hash esperado, gera com o nosso codigo e compara a partir do indice 4 (ignora $2a$ vs $2b$).",
-    "parte_4: dois hashes da mesma senha (sais diferentes), login certo/errado e ataque de dicionario (verifica cada palavra da lista contra o hash).",
-    "parte_5: duas senhas com 72 'A' iguais e finais diferentes -> hashes iguais.",
-    "menu: 1 gera hash passo a passo; 2 verifica senha; 3 ataca sua senha; 0 sai.",
+    "parte_1: gera hash de 'abc' com custo 4 mostrando os 6 passos e confere a contagem de cifragens com a formula.",
+    "parte_2: dois hashes da mesma senha (sais diferentes) e verificacao dos dois.",
+    "parte_3: senhas A, B e C; mostra que A e B (iguais nos 72 primeiros bytes) geram o mesmo hash e que B entra na conta de A.",
+    "forca_bruta_pin (menu 3): atacante testa PINs de 2 digitos ate acertar, mede as cifragens gastas e projeta o esforco para PINs de 4 e 6 digitos e custo 12, com cifragens_por_hash(custo).",
+    "menu: 1 gera hash passo a passo; 2 verifica senha; 3 forca bruta em PIN; 0 sai.",
 ])
 
 sub("Mapa: slide -> codigo")
@@ -255,7 +252,7 @@ tabela(["Slide", "Onde esta no codigo"],
         ["3 - passo 5", "bloco 'blocos = ...' e 64 cifragens em hash_bruto"],
         ["3 - passo 6", "gerar_hash (f-string com b64_codificar)"],
         ["6 - tempo constante", "dif |= x ^ y em verificar_senha"],
-        ["7 - 72 bytes", "[:72] em hash_bruto; demonstrado em parte_5"],
+        ["7 - 72 bytes", "[:72] em hash_bruto; demonstrado em parte_3"],
         ["5 - login", "verificar_senha"]],
        [40, 134])
 
@@ -271,18 +268,18 @@ qa = [
     ("O que e uma rede de Feistel?", "Divide o bloco em duas metades e, em varias rodadas, mistura uma com a outra usando uma funcao F e uma subchave. Aqui: 16 rodadas, bloco de 64 bits."),
     ("De onde vem os numeros iniciais do Blowfish?", "Dos digitos hexadecimais de pi. Calculamos com a formula de Machin. Garante que nao ha backdoor."),
     ("Por que o limite de 72 bytes?", "O vetor P tem 18 palavras de 4 bytes = 72 bytes; a chave (senha + \\0) e cortada nesse tamanho. O excedente e ignorado."),
-    ("O que acontece com senhas > 72 bytes?", "So os 72 primeiros contam. Mostramos na parte_5: duas senhas diferentes depois do byte 72 geram o mesmo hash. Solucao: pre-hash."),
+    ("O que acontece com senhas > 72 bytes?", "So os 72 primeiros contam. Mostramos na parte_3: duas senhas diferentes depois do byte 72 geram o mesmo hash. Solucao: pre-hash."),
     ("Por que o byte nulo e proibido?", "Porque o programa acrescenta um \\0 como terminador da chave; um \\0 dentro da senha causaria ambiguidade."),
     ("Como o login verifica a senha?", "Le custo e sal do hash guardado, recalcula com a senha digitada e compara os 23 bytes. Nao existe 'descriptografar'."),
     ("Por que comparar em tempo constante?", "Um == para no primeiro byte diferente; medindo o tempo, o atacante descobriria quantos bytes acertou (timing attack)."),
     ("Por que o texto 'OrpheanBeholderScryDoubt'?", "E um texto fixo de 24 bytes (3 blocos de 64 bits) cifrado 64 vezes. Foi escolhido pelos autores; o conteudo em si nao importa, so que seja fixo e conhecido. (Nao afirmar a origem do texto.)"),
     ("Por que descarta o ultimo byte?", "Sao 24 bytes cifrados, mas o formato usa 23 (31 caracteres base64). Detalhe historico da especificacao."),
     ("O sal gerado no seu codigo e seguro?", "Nao para producao: SplitMix64 semeado com enderecos de memoria. E so para a demo, pois nao pode importar os.urandom. Em sistemas reais usa-se o gerador do SO."),
-    ("Como sabem que a implementacao esta correta?", "Parte 3: para tres vetores do bcrypt oficial (incluindo o classico 'U*U'), geramos exatamente o mesmo hash."),
-    ("Qual a diferenca entre $2a$, $2b$ e $2y$?", "Versoes/correcoes de bugs. Para senhas curtas o hash e igual; so muda o prefixo. Por isso na parte_3 comparamos a partir do indice 4."),
+    ("Como sabem que a implementacao esta correta?", "Testamos em um site gerador de bcrypt: um hash gerado pelo nosso programa e validado pelo site, e um hash gerado pelo site e validado pelo nosso programa."),
+    ("Qual a diferenca entre $2a$, $2b$ e $2y$?", "Versoes/correcoes de bugs. Para senhas curtas o hash e igual; so muda o prefixo. Por isso nosso verificar_senha aceita as tres versoes."),
     ("bcrypt e criptografia?", "E hash de senhas. Usa uma cifra (Blowfish) por dentro, mas so cifra, nunca decifra. Nao e reversivel."),
     ("bcrypt x scrypt x Argon2id?", "bcrypt usa ~4 KB fixos. scrypt e Argon2id exigem memoria configuravel, resistindo melhor a GPU/ASIC. OWASP recomenda Argon2id para sistemas novos; bcrypt segue aceito."),
-    ("Se a senha for '123456', o bcrypt protege?", "Nao. Ela cai em qualquer dicionario (mostramos na parte_4). O bcrypt so encarece cada palpite."),
+    ("Se a senha for '123456', o bcrypt protege?", "Nao. Ela cai em qualquer dicionario (a forca bruta do menu 3 mostra isso: PIN curto cai rapido). O bcrypt so encarece cada palpite."),
     ("Por que a demo usa custo 4 e nao 12?", "Python puro e muito mais lento que C. Custo 12 seria ~256x mais trabalho que o 4. Em producao usa-se 12 ou mais."),
     ("E se o professor pedir para mudar algo?", "Custo: mudar CUSTO = 4 no topo da demo. Ver mais rodadas: trocar 'i < 3' por 'i < 16' em cifrar_bloco. Hash de uma senha especifica: menu opcao 1."),
 ]
@@ -307,7 +304,7 @@ itens([
     "[ ] Enviar bcrypt_seminario.py e o video no Classroom ate as 19h do dia da apresentacao.",
     "[ ] Abrir slides e terminal (na pasta do arquivo) antes de comecar.",
     "[ ] Cada um treina as suas falas em voz alta, cronometrando (~12 min).",
-    "[ ] Os dois leem a Parte 2 e as perguntas da Parte 3.",
+    "[ ] Os dois leem a Parte 2 (codigo) e as perguntas da Parte 3 deste guia.",
     "[ ] Combinar quem responde primeiro cada tipo de pergunta: slides 1 a 5 (conceito, passos e exemplo) = Isabela; demo e slides 6 a 9 (codigo, seguranca, limitacoes, comparacao) = Paulo. Se a pergunta for do outro, o outro complementa.",
 ])
 

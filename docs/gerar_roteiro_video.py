@@ -32,55 +32,43 @@ def fala(t):
     pdf.ln(1.5)
 
 
-h("Roteiro do vídeo: bcrypt (slides + código + teste no site)", 17)
+h("Roteiro do vídeo - parte do Paulo Victor", 17)
 pdf.set_font("Helvetica", "", 11)
-pdf.multi_cell(0, 5.5, "Duração: cerca de 6 a 7 minutos. Isabela: apresenta todos os slides (cerca de 3:30). Paulo Victor: mostra o código, roda e explica o resultado, e faz o teste no site gerador de bcrypt (cerca de 3:30). Os valores de sal e hash mudam a cada execução; leiam o que aparecer na tela.", **L)
+pdf.multi_cell(0, 5.5, "Duração: cerca de 4 minutos. A Isabela apresenta os slides; esta parte começa quando ela termina. Mostra o código, roda o programa explicando o resultado e testa o hash em um site gerador de bcrypt. Os valores de sal e hash mudam a cada execução; leia o que aparecer na tela.", **L)
 pdf.ln(1)
 pdf.set_font("Helvetica", "B", 11)
-pdf.multi_cell(0, 5.5, "Antes de gravar: (1) slides abertos em tela cheia; (2) terminal na pasta do projeto e o arquivo bcrypt_seminario.py aberto em um editor; (3) o site gerador de bcrypt aberto em uma aba; (4) rodar uma vez para testar (leva uns 15 s até o menu).", **L)
+pdf.multi_cell(0, 5.5, "Antes de gravar: (1) terminal na pasta do projeto; (2) bcrypt_seminario.py aberto em um editor; (3) o site gerador de bcrypt aberto em uma aba; (4) rodar uma vez para testar (leva uns 8 s até o menu).", **L)
 
-h("PARTE I - Slides (Isabela, ~3:30)", 15)
-slides = [
- ("Slide 1 - Capa (0:15)", "Olá, somos a Isabela e o Paulo Victor, tema 9: bcrypt. Vamos explicar como funciona, mostrar o nosso código em Python puro, sem nenhum import, e testar o resultado em um site."),
- ("Slide 2 - O que é o bcrypt (0:30)", "O bcrypt é uma função de hash feita para guardar senhas, criada em 1999 por Provos e Mazières e baseada na cifra Blowfish. Três ideias: hash de mão única, ou seja, do hash não se volta à senha; sal aleatório de 16 bytes, que faz a mesma senha gerar hashes diferentes; e custo ajustável, em que o trabalho se repete 2 elevado ao custo vezes. Embaixo vemos o hash de 60 caracteres: versão, custo, sal de 22 caracteres e hash de 31."),
- ("Slide 3 - Os 6 passos (0:50)", "O algoritmo tem seis passos. Um: a senha vira bytes, ganha um byte nulo e é cortada em 72 bytes. Dois: o estado inicial vem dos dígitos de pi. Três: mistura-se o sal e a senha, com 521 cifragens Blowfish. Quatro: repete-se 2 elevado ao custo vezes a mistura da senha e do sal; é aqui que mora a lentidão. Cinco: cifra-se 64 vezes um texto fixo. Seis: monta-se o hash final. Em cada caixa aparece o nome da função no código."),
- ("Slide 4 - Fluxo completo (0:25)", "Aqui o mesmo fluxo em diagrama. O banco guarda só o hash. O sal e o custo ficam dentro dele, e é por isso que o login consegue refazer o cálculo. Com custo 5 são 34.057 cifragens."),
- ("Slide 5 - Exemplo prático (0:35)", "Um exemplo real com a senha 'senhaeu' e custo 5. Vemos o primeiro valor do vetor P mudando a cada etapa e o hash final. No login, o sistema lê custo e sal do hash, refaz o cálculo com a senha digitada e compara em tempo constante. Trocar uma letra muda o hash por completo."),
- ("Slide 6 - Por que é seguro (0:30)", "O bcrypt não impede o palpite: ele torna cada palpite caro. O sal único derrota as rainbow tables, o custo acompanha o hardware, as etapas são em sequência e a comparação é em tempo constante, o que evita ataque de temporização. Os números de tentativas por segundo vêm do artigo citado no slide."),
- ("Slide 7 - Vantagens e limitações (0:30)", "As vantagens: feito para senhas, sal embutido, custo ajustável e suportado em todas as linguagens. As limitações: só 72 bytes de senha contam, usa apenas 4 KB de memória, o byte nulo é proibido e senha fraca continua fraca."),
- ("Slide 8 - bcrypt x scrypt x Argon2id (0:20)", "Comparando com o scrypt e o Argon2id: os dois exigem memória configurável e resistem melhor a GPUs. A OWASP recomenda o Argon2id para sistemas novos, mas o bcrypt continua aceito."),
- ("Slide 9 - Referências (0:10)", "Estas são as referências. Agora o Paulo vai mostrar o código funcionando."),
-]
-for t, f in slides:
-    pdf.set_font("Helvetica", "B", 10.5)
-    pdf.cell(0, 5.5, t, **L)
-    fala(f)
-
-h("PARTE II - Código (Paulo, ~1:00)", 15)
+h("1. Código (~0:50)")
 tela("editor com bcrypt_seminario.py; rolar devagar pelos blocos")
-fala("Este é o nosso código, em um único arquivo e sem nenhum import. Ele tem cinco blocos. A: calcula os dígitos de pi com a fórmula de Machin. B: implementa a cifra Blowfish, com a função F, as 16 rodadas e a função expandir_chave, que é a operação central. C: o base64 próprio do bcrypt. D: o sal aleatório, com um gerador simples, só para demonstração. E: junta tudo em hash_bruto, gerar_hash e verificar_senha.")
+fala("Agora vou mostrar o código. É um único arquivo, sem nenhum import. Ele tem cinco blocos. A: calcula os dígitos de pi com a fórmula de Machin. B: implementa a cifra Blowfish, com a função F, as 16 rodadas e a função expandir_chave, que é a operação central. C: o base64 próprio do bcrypt. D: o sal aleatório, com um gerador simples, só para demonstração. E: junta tudo em hash_bruto, gerar_hash e verificar_senha.")
 tela("parar em hash_bruto, no laço for _ in range(2 ** custo)")
 fala("Aqui está a lentidão proposital: o laço repete 2 elevado ao custo vezes duas chamadas de expandir_chave. Cada +1 de custo dobra o tempo.")
 
-h("PARTE III - Rodar e explicar o resultado (Paulo, ~1:30)", 15)
+h("2. Rodar e explicar o resultado (~1:30)")
 tela("terminal: python bcrypt_seminario.py")
-fala("Vou rodar. Parte 1: o programa confere que os dígitos de pi que calculamos são iguais aos do artigo original do Blowfish, P[0] igual a 243F6A88, e mostra três rodadas de Feistel. Parte 2: o bcrypt passo a passo com a senha 'abc' e custo 4. Vemos o P[0] mudando a cada etapa, o hash final e a contagem de 17.385 cifragens, igual à fórmula. Parte 3: três vetores do bcrypt oficial; o nosso código gera exatamente o mesmo hash e aparece OK nos três.")
-fala("Parte 4: a mesma senha gera dois hashes diferentes por causa do sal; o login certo dá True e o errado dá False; e o ataque de dicionário acha a senha fraca na sexta tentativa. Parte 5: duas senhas que só diferem depois do byte 72 geram o mesmo hash.")
+fala("Vou rodar o programa. A Parte 1 mostra o bcrypt passo a passo com a senha 'abc' e custo 4, que são 16 repetições. O sal são 16 bytes aleatórios e muda a cada execução. No passo 1 a senha vira 4 bytes: 'abc' mais um byte nulo. No passo 2 o estado começa com os dígitos de pi, P[0] igual a 243F6A88. No passo 3 misturamos sal e senha e o P[0] muda. No passo 4 repetimos as 16 voltas e o P[0] muda de novo; esse laço é a parte lenta. No passo 5 cifra-se 64 vezes um texto fixo, e no passo 6 montamos o hash final. Embaixo o programa mostra 17.385 cifragens, igual à fórmula, e a anatomia do hash: versão, custo 04, sal de 22 caracteres e hash de 31.")
+tela("PARTE 2: hash 1 e hash 2, sal 1 e sal 2, True/True")
+fala("A Parte 2 mostra o sal. A mesma senha, 'senha123', gerou dois hashes diferentes, porque cada um recebeu um sal aleatório. Os dois continuam válidos: a verificação dá True nos dois, porque o login lê o sal de dentro de cada hash.")
+tela("PARTE 3: senhas A, B e C, hashes, ACEITO!")
+fala("A Parte 3 mostra uma limitação: o bcrypt só usa os 72 primeiros bytes da senha. As senhas A e B só diferem depois do byte 72, e os hashes saem iguais. Já a C difere no primeiro byte, e o hash muda. O resultado é que a senha B consegue entrar na conta da senha A. Por isso, em sistemas reais, senhas longas passam por um pré-hash.")
 
-h("PARTE IV - Teste no site (Paulo, ~1:00)", 15)
+h("3. Força bruta em PIN (~0:40)")
+tela("menu: digitar 3; PIN 07 (ou Enter); mostrar a tabela de projeção")
+fala("No menu, a opção 3 simula um atacante que testa PINs de 2 dígitos, de 00 em diante, até acertar. O programa conta quantas cifragens ele gastou, cerca de 17 mil por tentativa. Embaixo está a projeção: um PIN de 4 dígitos com custo 4 já dá centenas de milhões de cifragens, e com custo 12 são cerca de 245 vezes mais. O esforço cresce com o tamanho da senha e com o custo, e é isso que o bcrypt oferece.")
+
+h("4. Teste no site (~1:00)")
 tela("menu: digitar 1, senha videoteste, custo 4; copiar o hash $2b$04$...")
-fala("Agora a prova externa. Vou gerar um hash da senha 'videoteste' com o nosso programa e copiar o resultado.")
+fala("Agora a prova externa. Vou gerar com o nosso programa o hash da senha 'videoteste' e copiá-lo.")
 tela("no site gerador de bcrypt: aba de verificação (Check/Compare); colar senha e hash")
 fala("Neste site gerador de bcrypt, colo a senha e o hash. O site informa que bate. Ou seja, um bcrypt feito por terceiros reconhece o hash do nosso código como válido.")
 tela("no site: gerar hash de 'videoteste' com custo 4; no programa, menu 2: senha e hash colado")
-fala("Fazendo o caminho inverso: gero um hash no site, e o nosso programa o verifica na opção 2. Aparece 'Senha CORRETA'. Se eu mudar uma letra da senha, aparece 'INCORRETA'.")
-
-h("Encerramento (Isabela e Paulo, ~0:15)", 15)
-fala("Resumindo: o bcrypt usa sal aleatório e custo ajustável para tornar cada palpite de senha muito mais caro, e a nossa implementação em Python puro é compatível com o bcrypt oficial. Obrigado por assistir!")
+fala("Agora o caminho inverso: gero um hash no site e o nosso programa o verifica na opção 2. Aparece 'Senha CORRETA'. Se eu mudar uma letra da senha, aparece 'INCORRETA'.")
+fala("Resumindo: a nossa implementação em Python puro é compatível com o bcrypt oficial. Obrigado por assistir!")
 
 h("Dicas de gravação", 12)
 pdf.set_font("Helvetica", "", 11)
-for t in ["Gravem em partes (slides, depois código e terminal) e juntem; é mais fácil de refazer.",
+for t in ["Rolar o terminal para cima ajuda a mostrar cada parte enquanto fala.",
           "Use custo 4 ou 5 no menu e no site. Custos altos demoram muito em Python puro.",
           "Use só senhas de teste no site, nunca senhas reais.",
           "Se o site gerar hash $2a$ ou $2y$, o programa aceita na verificação.",
