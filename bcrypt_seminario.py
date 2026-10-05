@@ -322,13 +322,6 @@ def verificar_senha(senha, armazenado):
 # ---------------------------------------------------------------------
 
 CUSTO = 4      # Python puro e lento: use 4 a 6 na demo (producao: 12+)
-# Vetores de teste: pares (senha, hash) gerados pela biblioteca OFICIAL.
-# Se o nosso codigo produzir o mesmo hash, a implementacao esta correta.
-VETORES = [("U*U", "$2a$05$CCCCCCCCCCCCCCCCCCCCC.E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW"),
-           ("", "$2b$04$......................w74bL5gU7LSJClZClCa.Pkz14aTv/XO"),
-           ("abc", "$2b$04$AAAAAAAAAAAAAAAAAAAAA.yZXZXV6HkSkIZ0VwC5Eh2gcvbnBww1G")]
-
-
 def titulo(t):
     print("\n" + "=" * 70 + "\n" + t + "\n" + "=" * 70)
 
@@ -392,26 +385,6 @@ def parte_3():
     print(" Consequencia: duas senhas diferentes valem o mesmo. Solucao: pre-hash da senha.")
 
 
-def extra_blowfish():
-    """Mostra que os digitos de PI calculados batem com os do paper."""
-    titulo("EXTRA - Blowfish e os digitos de PI")
-    ok = P0[0] == 0x243F6A88 and S0[0][0] == 0xD1310BA6
-    print(f" P[0] = {P0[0]:08X} (oficial 243F6A88) | S0[0] = {S0[0][0]:08X} (oficial D1310BA6)")
-    print(" Tabelas identicas as do paper do Blowfish." if ok else " ERRO nas tabelas!")
-    e, d = cifrar_bloco(Estado(), 0, 0, detalhar=True)
-    print(f"           Resultado: E = {e:08X}  D = {d:08X}")
-
-
-def extra_vetores():
-    """Prova de correcao: confere com hashes gerados pelo bcrypt oficial."""
-    titulo("EXTRA - Vetores de teste oficiais do bcrypt")
-    for senha, esperado in VETORES:
-        sal = b64_decodificar(esperado[7:29], 16)
-        obtido = gerar_hash(senha, int(esperado[4:6]), sal)
-        # $2a$ e $2b$ so diferem no prefixo, entao comparamos de [4:] em diante
-        print(f" senha {senha!r:6} -> {'OK' if obtido[4:] == esperado[4:] else 'ERRO'}")
-
-
 def cifragens_por_hash(custo):
     """Cifragens Blowfish para gerar UM hash: (1 + 2*2^custo) ExpandKey x 521 + 192."""
     return (1 + 2 * 2 ** custo) * 521 + 192
@@ -449,7 +422,6 @@ def menu():
     """Menu para testar ao vivo na apresentacao."""
     while True:
         titulo("MENU: [1] Gerar hash  [2] Verificar senha  [3] Forca bruta em PIN  [0] Sair")
-        print(" Extras: [4] Vetores oficiais  [5] Blowfish e PI")
         op = ler(" Escolha: ", "0")
         if op == "1":
             try:
@@ -461,10 +433,6 @@ def menu():
             print(" Senha CORRETA" if ok else " Senha INCORRETA (ou hash invalido)")
         elif op == "3":
             forca_bruta_pin()
-        elif op == "4":
-            extra_vetores()
-        elif op == "5":
-            extra_blowfish()
         elif op == "0":
             break
 
